@@ -5,16 +5,21 @@
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
     <el-form-item label="收/支" prop="type">
-      <el-input v-model="dataForm.type" placeholder="收/支"></el-input>
+<!--      <el-input v-model="dataForm.type" placeholder="收/支"></el-input>-->
+      <el-select v-model="dataForm.type" placeholder="收/支">
+        <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
     </el-form-item>
     <el-form-item label="内容" prop="content">
       <el-input v-model="dataForm.content" placeholder="内容"></el-input>
     </el-form-item>
     <el-form-item label="费用" prop="amount">
-      <el-input v-model="dataForm.amount" placeholder="费用"></el-input>
-    </el-form-item>
-    <el-form-item label="创建时间" prop="createTime">
-      <el-input v-model="dataForm.createTime" placeholder="创建时间"></el-input>
+      <el-input v-model="dataForm.amount" type="number" placeholder="费用"></el-input>
     </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
@@ -29,6 +34,14 @@
     data () {
       return {
         visible: false,
+        options: [{
+          value: '收入',
+          label: '收入'
+        },
+        {
+          value: '支出',
+          label: '支出'
+        }],
         dataForm: {
           id: 0,
           type: '',
@@ -86,7 +99,6 @@
                 'type': this.dataForm.type,
                 'content': this.dataForm.content,
                 'amount': this.dataForm.amount,
-                'createTime': this.dataForm.createTime
               })
             }).then(({data}) => {
               if (data && data.code === 0) {

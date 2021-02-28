@@ -23,16 +23,10 @@
         width="50">
       </el-table-column>
       <el-table-column
-        prop="id"
+        prop="empName"
         header-align="center"
         align="center"
-        label="">
-      </el-table-column>
-      <el-table-column
-        prop="empId"
-        header-align="center"
-        align="center"
-        label="员工id">
+        label="员工姓名">
       </el-table-column>
       <el-table-column
         prop="attendanceDate"
@@ -85,7 +79,8 @@
 </template>
 
 <script>
-  import AddOrUpdate from './empattendance-add-or-update'
+  import AddOrUpdate from './empattendance-add-or-update';
+  import { formatDate } from '@/utils/dateUtils';
   export default {
     data () {
       return {
@@ -98,7 +93,8 @@
         totalPage: 0,
         dataListLoading: false,
         dataListSelections: [],
-        addOrUpdateVisible: false
+        addOrUpdateVisible: false,
+        empList: []
       }
     },
     components: {
@@ -121,13 +117,47 @@
           })
         }).then(({data}) => {
           if (data && data.code === 0) {
-            this.dataList = data.page.list
-            this.totalPage = data.page.totalCount
+            console.log(data);
+            // this.dataList = data.page.list
+            const resultData = data.page.list;
+            if (resultData && resultData.length > 0) {
+              let empIdList = [];
+              resultData.forEach(item => {
+                empIdList.push(item.empId);
+              });
+              this.getEmpData(empIdList,data);
+            }
           } else {
             this.dataList = []
             this.totalPage = 0
           }
+          console.log(this.dataList);
           this.dataListLoading = false
+        })
+      },
+      getEmpData(empIdList,attendanceData) {
+        let empIds = empIdList.map(item => item).join(',');
+        this.$http({
+          url: this.$http.adornUrl('/generator/empinfo/listByIds?empIdList=' + empIds),
+          method: 'get'
+        }).then(({data}) => {
+          if (data && data.code === 0 && data.empList && data.empList.length > 0) {
+            attendanceData.page.list.forEach(attendance => {
+              data.empList.forEach(emp => {
+                if (attendance.empId === emp.id) {
+                  attendance.empName = emp.name
+                  return;
+                }
+              })
+            })
+          } else {
+            this.$notify.error({
+              title: '错误',
+              message: '获取员工数据失败'
+            });
+          }
+          this.dataList = attendanceData.page.list
+          this.totalPage = attendanceData.page.totalCount
         })
       },
       // 每页数

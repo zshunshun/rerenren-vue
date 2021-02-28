@@ -22,12 +22,12 @@
         align="center"
         width="50">
       </el-table-column>
-      <el-table-column
-        prop="id"
-        header-align="center"
-        align="center"
-        label="">
-      </el-table-column>
+<!--      <el-table-column-->
+<!--        prop="id"-->
+<!--        header-align="center"-->
+<!--        align="center"-->
+<!--        label="">-->
+<!--      </el-table-column>-->
       <el-table-column
         prop="no"
         header-align="center"
@@ -71,10 +71,14 @@
         label="描述">
       </el-table-column>
       <el-table-column
-        prop="pic"
-        header-align="center"
         align="center"
         label="相片">
+        <template slot-scope="scope">
+          <el-image
+            style="width: 80px; height: 80px"
+            :src="scope.row.pic"
+            :fit="'fill'"></el-image>
+        </template>
       </el-table-column>
       <el-table-column
         prop="basicSalary"

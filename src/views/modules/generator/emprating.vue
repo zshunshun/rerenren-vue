@@ -22,23 +22,23 @@
         align="center"
         width="50">
       </el-table-column>
+<!--      <el-table-column-->
+<!--        prop="id"-->
+<!--        header-align="center"-->
+<!--        align="center"-->
+<!--        label="">-->
+<!--      </el-table-column>-->
       <el-table-column
-        prop="id"
+        prop="emp.name"
         header-align="center"
         align="center"
-        label="">
+        label="员工">
       </el-table-column>
       <el-table-column
-        prop="empId"
+        prop="user.username"
         header-align="center"
         align="center"
-        label="员工id">
-      </el-table-column>
-      <el-table-column
-        prop="userId"
-        header-align="center"
-        align="center"
-        label="评价人id">
+        label="评价人">
       </el-table-column>
       <el-table-column
         prop="star"
@@ -123,11 +123,66 @@
           if (data && data.code === 0) {
             this.dataList = data.page.list
             this.totalPage = data.page.totalCount
+            this.getEmpInfo();
+            this.getUserInfo();
           } else {
             this.dataList = []
             this.totalPage = 0
           }
           this.dataListLoading = false
+        })
+      },
+      getEmpInfo: function () {
+        let dataList = this.dataList
+        let empIdList = []
+        dataList.forEach(data => {
+          empIdList.push(data.empId)
+        })
+        this.$http({
+          url: this.$http.adornUrl('/generator/empinfo/listByIds'),
+          method: 'get',
+          params: this.$http.adornParams({
+            'empIdList': empIdList.map(item => item).join(',')
+          })
+        }).then(({data}) => {
+          if (data && data.code == 0) {
+            let empList = data.empList;
+            this.dataList.forEach(item => {
+              empList.forEach(emp => {
+                if (item.empId == emp.id) {
+                  this.$set(item,'emp',emp);
+                  return;
+                }
+              });
+            });
+          }
+        })
+      },
+      getUserInfo() {
+        let dataList = this.dataList
+        let userIdList = []
+        dataList.forEach(data => {
+          userIdList.push(data.userId)
+        })
+        this.$http({
+          url: this.$http.adornUrl('/sys/user/listByIds'),
+          method: 'get',
+          params: this.$http.adornParams({
+            'userIdList': userIdList.map(item => item).join(',')
+          })
+        }).then(({data}) => {
+          if (data && data.code == 0) {
+            let userList = data.userList;
+            console.log(userList);
+            this.dataList.forEach(item => {
+              userList.forEach(user => {
+                if (item.userId == user.userId) {
+                  this.$set(item,'user',user);
+                  return;
+                }
+              });
+            });
+          }
         })
       },
       // 每页数

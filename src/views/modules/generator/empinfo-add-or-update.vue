@@ -4,9 +4,6 @@
     :close-on-click-modal="false"
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
-    <el-form-item label="编号" prop="no">
-      <el-input v-model="dataForm.no" placeholder="编号"></el-input>
-    </el-form-item>
     <el-form-item label="姓名" prop="name">
       <el-input v-model="dataForm.name" placeholder="姓名"></el-input>
     </el-form-item>
@@ -31,9 +28,6 @@
     <el-form-item label="基本工资" prop="basicSalary">
       <el-input v-model="dataForm.basicSalary" placeholder="基本工资"></el-input>
     </el-form-item>
-    <el-form-item label="创建时间" prop="createTime">
-      <el-input v-model="dataForm.createTime" placeholder="创建时间"></el-input>
-    </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
       <el-button @click="visible = false">取消</el-button>
@@ -43,6 +37,7 @@
 </template>
 
 <script>
+  import { formatDate } from '@/utils/dateUtils'
   export default {
     data () {
       return {
@@ -116,7 +111,6 @@
                 this.dataForm.description = data.empInfo.description
                 this.dataForm.pic = data.empInfo.pic
                 this.dataForm.basicSalary = data.empInfo.basicSalary
-                this.dataForm.createTime = data.empInfo.createTime
               }
             })
           }
@@ -124,6 +118,7 @@
       },
       // 表单提交
       dataFormSubmit () {
+        console.log(this.dataForm.createTime);
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             this.$http({
@@ -139,8 +134,7 @@
                 'job': this.dataForm.job,
                 'description': this.dataForm.description,
                 'pic': this.dataForm.pic,
-                'basicSalary': this.dataForm.basicSalary,
-                'createTime': this.dataForm.createTime
+                'basicSalary': this.dataForm.basicSalary
               })
             }).then(({data}) => {
               if (data && data.code === 0) {
