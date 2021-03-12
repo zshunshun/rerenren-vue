@@ -22,12 +22,12 @@
         align="center"
         width="50">
       </el-table-column>
-      <el-table-column
-        prop="id"
-        header-align="center"
-        align="center"
-        label="">
-      </el-table-column>
+<!--      <el-table-column-->
+<!--        prop="id"-->
+<!--        header-align="center"-->
+<!--        align="center"-->
+<!--        label="">-->
+<!--      </el-table-column>-->
       <el-table-column
         prop="name"
         header-align="center"
@@ -70,11 +70,21 @@
         align="center"
         label="家庭住址">
       </el-table-column>
+<!--      <el-table-column-->
+<!--        prop="pic"-->
+<!--        header-align="center"-->
+<!--        align="center"-->
+<!--        label="相片">-->
+<!--      </el-table-column>-->
       <el-table-column
-        prop="pic"
-        header-align="center"
         align="center"
         label="相片">
+        <template slot-scope="scope">
+          <el-image
+            style="width: 80px; height: 80px"
+            :src="scope.row.pic"
+            :fit="'fill'"></el-image>
+        </template>
       </el-table-column>
       <el-table-column
         prop="walletAmount"
@@ -82,12 +92,12 @@
         align="center"
         label="钱包余额">
       </el-table-column>
-      <el-table-column
-        prop="healthRecord"
-        header-align="center"
-        align="center"
-        label="健康档案">
-      </el-table-column>
+<!--      <el-table-column-->
+<!--        prop="healthRecord"-->
+<!--        header-align="center"-->
+<!--        align="center"-->
+<!--        label="健康档案">-->
+<!--      </el-table-column>-->
       <el-table-column
         prop="operationUserId"
         header-align="center"
@@ -104,10 +114,11 @@
         fixed="right"
         header-align="center"
         align="center"
-        width="150"
+        width="200"
         label="操作">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
+          <el-button type="text" size="small" @click="showHealthRecord(scope.row)">查看健康档案</el-button>
           <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
@@ -150,6 +161,9 @@
       this.getDataList()
     },
     methods: {
+      showHealthRecord(data) {
+        console.log('data',data);
+      },
       // 获取数据列表
       getDataList () {
         this.dataListLoading = true

@@ -2,12 +2,21 @@
   <div class="mod-config">
     <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
       <el-form-item>
-        <el-input v-model="dataForm.key" placeholder="参数名" clearable></el-input>
+        <el-input v-model="dataForm.key" placeholder="员工关键词" clearable></el-input>
+      </el-form-item>
+      <el-form-item label=" 年月:" prop="starDate">
+        <!--      <el-input v-model="dataForm.starDate" placeholder="评级所属年月"></el-input>-->
+        <el-date-picker
+          v-model="dataForm.recordDate"
+          type="month"
+          placeholder="选择月">
+        </el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
-        <el-button v-if="isAuth('generator:empsalaryrecord:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
-        <el-button v-if="isAuth('generator:empsalaryrecord:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
+<!--        <el-button v-if="isAuth('generator:empsalaryrecord:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>-->
+<!--        <el-button v-if="isAuth('generator:empsalaryrecord:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>-->
+        <el-button v-if="isAuth('generator:empsalaryrecord:delete')" type="success" @click="generateHandle()" >生成上月工资</el-button>
       </el-form-item>
     </el-form>
     <el-table
@@ -23,16 +32,10 @@
         width="50">
       </el-table-column>
       <el-table-column
-        prop="id"
+        prop="emp.name"
         header-align="center"
         align="center"
-        label="">
-      </el-table-column>
-      <el-table-column
-        prop="empId"
-        header-align="center"
-        align="center"
-        label="员工id">
+        label="员工">
       </el-table-column>
       <el-table-column
         prop="amount"
@@ -59,7 +62,7 @@
         label="总工资">
       </el-table-column>
       <el-table-column
-        prop="operationUserId"
+        prop="user.username"
         header-align="center"
         align="center"
         label="操作人">
@@ -82,10 +85,10 @@
         align="center"
         width="150"
         label="操作">
-        <template slot-scope="scope">
-          <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
-          <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>
-        </template>
+<!--        <template slot-scope="scope">-->
+<!--&lt;!&ndash;          <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>&ndash;&gt;-->
+<!--&lt;!&ndash;          <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>&ndash;&gt;-->
+<!--        </template>-->
       </el-table-column>
     </el-table>
     <el-pagination
@@ -103,7 +106,8 @@
 </template>
 
 <script>
-  import AddOrUpdate from './empsalaryrecord-add-or-update'
+  import AddOrUpdate from './empsalaryrecord-add-or-update';
+  import { formatDate } from '@/utils/dateUtils';
   export default {
     data () {
       return {
@@ -129,23 +133,73 @@
       // 获取数据列表
       getDataList () {
         this.dataListLoading = true
+        let recordDate = this.dataForm.recordDate;
         this.$http({
           url: this.$http.adornUrl('/generator/empsalaryrecord/list'),
           method: 'get',
           params: this.$http.adornParams({
             'page': this.pageIndex,
             'limit': this.pageSize,
-            'key': this.dataForm.key
+            'key': this.dataForm.key,
+            'recordDate': (recordDate && typeof(recordDate) != 'string') ? formatDate(recordDate,'yyyy-MM') : recordDate,
           })
         }).then(({data}) => {
           if (data && data.code === 0) {
             this.dataList = data.page.list
             this.totalPage = data.page.totalCount
+            this.fileEmpName();
+            this.fileUserName();
           } else {
             this.dataList = []
             this.totalPage = 0
           }
           this.dataListLoading = false
+        })
+      },
+      // 填充员工信息
+      fileEmpName() {
+        let dataList = this.dataList;
+        let empIdList = dataList.map(item => item.empId);
+        this.$http({
+          url: this.$http.adornUrl('/generator/empinfo/listByIds'),
+          method: 'get',
+          params: this.$http.adornParams({
+            'empIdList': empIdList.join(',')
+          })
+        }).then(({data}) => {
+          if (data && data.code === 0) {
+            dataList.forEach(item => {
+              data.empList.forEach(emp => {
+                if (item.empId === emp.id) {
+                  this.$set(item,'emp',emp);
+                  return;
+                }
+              })
+            })
+          }
+        })
+      },
+      // 填充操作人信息
+      fileUserName() {
+        let dataList = this.dataList;
+        let operationUserId = dataList.map(item => item.operationUserId);
+        this.$http({
+          url: this.$http.adornUrl('/sys/user/listByIds'),
+          method: 'get',
+          params: this.$http.adornParams({
+            'userIdList': operationUserId.join(',')
+          })
+        }).then(({data}) => {
+          if (data && data.code === 0) {
+            dataList.forEach(item => {
+              data.userList.forEach(user => {
+                if (item.operationUserId === user.userId) {
+                  this.$set(item,'user',user);
+                  return;
+                }
+              })
+            })
+          }
         })
       },
       // 每页数
@@ -198,6 +252,26 @@
               this.$message.error(data.msg)
             }
           })
+        })
+      },
+      generateHandle () {
+        this.$http({
+          url: this.$http.adornUrl('/generator/empsalaryrecord/generateForLastMonth'),
+          method: 'post',
+          data: this.$http.adornData("", false)
+        }).then(({data}) => {
+          if (data && data.code === 0) {
+            this.$message({
+              message: '操作成功',
+              type: 'success',
+              duration: 1500,
+              onClose: () => {
+                this.getDataList()
+              }
+            })
+          } else {
+            this.$message.error(data.msg)
+          }
         })
       }
     }
