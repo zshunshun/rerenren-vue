@@ -99,7 +99,7 @@
 <!--        label="健康档案">-->
 <!--      </el-table-column>-->
       <el-table-column
-        prop="operationUserId"
+        prop="user.username"
         header-align="center"
         align="center"
         label="操作人">
@@ -118,7 +118,7 @@
         label="操作">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
-          <el-button type="text" size="small" @click="showHealthRecord(scope.row)">查看健康档案</el-button>
+          <el-button type="text" size="small" @click="showHealthRecord(scope.row)">健康档案</el-button>
           <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
@@ -134,11 +134,13 @@
     </el-pagination>
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
+    <edit-health-file v-if="dialogHealthVisible" ref="editHealthFile" @refreshDataList="getDataList" ></edit-health-file>
   </div>
 </template>
 
 <script>
   import AddOrUpdate from './gafferinfo-add-or-update'
+  import editHealthFile from './gafferinfo-edit-health-file.vue'
   export default {
     data () {
       return {
@@ -151,11 +153,13 @@
         totalPage: 0,
         dataListLoading: false,
         dataListSelections: [],
-        addOrUpdateVisible: false
+        addOrUpdateVisible: false,
+        dialogHealthVisible: false
       }
     },
     components: {
-      AddOrUpdate
+      AddOrUpdate,
+      editHealthFile
     },
     activated () {
       this.getDataList()
@@ -163,9 +167,14 @@
     methods: {
       showHealthRecord(data) {
         console.log('data',data);
+        this.dialogHealthVisible = true;
+        this.$nextTick(() => {
+          this.$refs.editHealthFile.init(data.id)
+        })
       },
       // 获取数据列表
       getDataList () {
+        let that = this;
         this.dataListLoading = true
         this.$http({
           url: this.$http.adornUrl('/generator/gafferinfo/list'),
@@ -179,11 +188,38 @@
           if (data && data.code === 0) {
             this.dataList = data.page.list
             this.totalPage = data.page.totalCount
+            that.getUserInfo();
           } else {
             this.dataList = []
             this.totalPage = 0
           }
           this.dataListLoading = false
+        })
+      },
+      getUserInfo() {
+        let dataList = this.dataList
+        let userIdList = []
+        dataList.forEach(data => {
+          userIdList.push(data.operationUserId)
+        })
+        this.$http({
+          url: this.$http.adornUrl('/sys/user/listByIds'),
+          method: 'get',
+          params: this.$http.adornParams({
+            'userIdList': userIdList.map(item => item).join(',')
+          })
+        }).then(({data}) => {
+          if (data && data.code == 0) {
+            let userList = data.userList;
+            this.dataList.forEach(item => {
+              userList.forEach(user => {
+                if (item.operationUserId == user.userId) {
+                  this.$set(item,'user',user);
+                  return;
+                }
+              });
+            });
+          }
         })
       },
       // 每页数
