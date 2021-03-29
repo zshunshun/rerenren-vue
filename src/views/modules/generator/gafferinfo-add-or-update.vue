@@ -28,9 +28,9 @@
     <el-form-item label="相片" prop="pic">
       <el-input v-model="dataForm.pic" placeholder="相片"></el-input>
     </el-form-item>
-    <el-form-item label="钱包余额" prop="walletAmount">
-      <el-input v-model="dataForm.walletAmount" placeholder="钱包余额"></el-input>
-    </el-form-item>
+<!--    <el-form-item label="钱包余额" prop="walletAmount">-->
+<!--      <el-input v-model="dataForm.walletAmount" placeholder="钱包余额"></el-input>-->
+<!--    </el-form-item>-->
 <!--    <el-form-item label="健康档案" prop="healthRecord">-->
 <!--      <el-input v-model="dataForm.healthRecord" placeholder="健康档案"></el-input>-->
 <!--    </el-form-item>-->
@@ -93,9 +93,9 @@
           pic: [
             { required: true, message: '相片不能为空', trigger: 'blur' }
           ],
-          walletAmount: [
-            { required: true, message: '钱包余额不能为空', trigger: 'blur' }
-          ],
+          // walletAmount: [
+          //   { required: true, message: '钱包余额不能为空', trigger: 'blur' }
+          // ],
           // healthRecord: [
           //   { required: true, message: '健康档案不能为空', trigger: 'blur' }
           // ],
@@ -129,7 +129,7 @@
                 this.dataForm.guardianTelephone = data.gafferInfo.guardianTelephone
                 this.dataForm.address = data.gafferInfo.address
                 this.dataForm.pic = data.gafferInfo.pic
-                this.dataForm.walletAmount = data.gafferInfo.walletAmount
+                // this.dataForm.walletAmount = data.gafferInfo.walletAmount
                 // this.dataForm.healthRecord = data.gafferInfo.healthRecord
                 // this.dataForm.operationUserId = data.gafferInfo.operationUserId
                 // this.dataForm.createTime = data.gafferInfo.createTime
@@ -172,7 +172,6 @@
                 'guardianTelephone': this.dataForm.guardianTelephone,
                 'address': this.dataForm.address,
                 'pic': this.dataForm.pic,
-                'walletAmount': this.dataForm.walletAmount,
                 'healthRecord': this.dataForm.healthRecord,
                 'operationUserId': this.dataForm.operationUserId,
                 'createTime': this.dataForm.createTime

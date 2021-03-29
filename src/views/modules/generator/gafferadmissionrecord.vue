@@ -22,17 +22,17 @@
         align="center"
         width="50">
       </el-table-column>
+<!--      <el-table-column-->
+<!--        prop="id"-->
+<!--        header-align="center"-->
+<!--        align="center"-->
+<!--        label="">-->
+<!--      </el-table-column>-->
       <el-table-column
-        prop="id"
+        prop="gaffer.name"
         header-align="center"
         align="center"
-        label="">
-      </el-table-column>
-      <el-table-column
-        prop="gafferId"
-        header-align="center"
-        align="center"
-        label="老人账户id">
+        label="老人">
       </el-table-column>
       <el-table-column
         prop="type"
@@ -111,12 +111,44 @@
           if (data && data.code === 0) {
             this.dataList = data.page.list
             this.totalPage = data.page.totalCount
+            console.log(this.dataList);
+            this.getGafferInfo();
           } else {
             this.dataList = []
             this.totalPage = 0
           }
           this.dataListLoading = false
         })
+      },
+      getGafferInfo() {
+        if (this.dataList && this.dataList.length > 0) {
+          let gafferIdList = [];
+          this.dataList.forEach(item => {
+            gafferIdList.push(item.gafferId);
+          })
+          this.$http({
+            url: this.$http.adornUrl('/generator/gafferinfo/list'),
+            method: 'get',
+            params: this.$http.adornParams({
+              'gafferIdList': gafferIdList.join(',')
+            })
+          }).then(({data}) => {
+            if (data && data.code === 0) {
+              console.log('gafferInfo',data.page.list);
+              let dataList = data.page.list;
+              if (dataList && dataList.length > 0) {
+                this.dataList.forEach(item => {
+                  dataList.forEach(gaffer => {
+                    if (item.gafferId === gaffer.id) {
+                      this.$set(item,'gaffer',gaffer);
+                      return;
+                    }
+                  })
+                })
+              }
+            }
+          })
+        }
       },
       // 每页数
       sizeChangeHandle (val) {
