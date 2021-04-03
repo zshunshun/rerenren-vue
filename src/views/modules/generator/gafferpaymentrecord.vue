@@ -23,16 +23,10 @@
         width="50">
       </el-table-column>
       <el-table-column
-        prop="id"
+        prop="gaffer.name"
         header-align="center"
         align="center"
-        label="">
-      </el-table-column>
-      <el-table-column
-        prop="gafferId"
-        header-align="center"
-        align="center"
-        label="老人账户id">
+        label="老人名称">
       </el-table-column>
       <el-table-column
         prop="amount"
@@ -102,6 +96,39 @@
       this.getDataList()
     },
     methods: {
+      getGafferInfo() {
+        let list = this.dataList;
+        if (list && list.length > 0) {
+          console.log('list:',list);
+          let gafferIds = [];
+          list.forEach(item => {
+            gafferIds.push(item.gafferId);
+          })
+          // 获取老人信息
+          this.$http({
+            url: this.$http.adornUrl('/generator/gafferinfo/list'),
+            method: 'get',
+            params: this.$http.adornParams({
+              'gafferIdList': gafferIds.join(',')
+            })
+          }).then(({data}) => {
+            if (data && data.code === 0) {
+              console.log('gafferInfo',data.page.list);
+              let dataList = data.page.list;
+              if (dataList && dataList.length > 0) {
+                this.dataList.forEach(item => {
+                  dataList.forEach(gaffer => {
+                    if (item.gafferId === gaffer.id) {
+                      this.$set(item,'gaffer',gaffer);
+                      return;
+                    }
+                  })
+                })
+              }
+            }
+          })
+        }
+      },
       // 获取数据列表
       getDataList () {
         this.dataListLoading = true
@@ -117,6 +144,7 @@
           if (data && data.code === 0) {
             this.dataList = data.page.list
             this.totalPage = data.page.totalCount
+            this.getGafferInfo();
           } else {
             this.dataList = []
             this.totalPage = 0
