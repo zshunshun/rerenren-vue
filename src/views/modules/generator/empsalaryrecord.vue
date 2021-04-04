@@ -79,17 +79,17 @@
         align="center"
         label="创建时间">
       </el-table-column>
-      <el-table-column
+      <!-- <el-table-column
         fixed="right"
         header-align="center"
         align="center"
         width="150"
-        label="操作">
+        label="操作"> -->
 <!--        <template slot-scope="scope">-->
 <!--&lt;!&ndash;          <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>&ndash;&gt;-->
 <!--&lt;!&ndash;          <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>&ndash;&gt;-->
 <!--        </template>-->
-      </el-table-column>
+      <!-- </el-table-column> -->
     </el-table>
     <el-pagination
       @size-change="sizeChangeHandle"
