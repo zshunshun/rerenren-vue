@@ -158,7 +158,7 @@
         if(keyword != '') {
           this.loading = true;
           this.$http({
-            url: this.$http.adornUrl('/generator/empinfo/search'),
+            url: this.$http.adornUrl('/generator/empinfo/searchForSalary'),
             method: 'get',
             params: this.$http.adornParams({
               'keyword': keyword

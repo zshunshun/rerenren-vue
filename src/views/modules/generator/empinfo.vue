@@ -53,6 +53,12 @@
         label="年龄">
       </el-table-column>
       <el-table-column
+        prop="statusStr"
+        header-align="center"
+        align="center"
+        label="状态">
+      </el-table-column>
+      <el-table-column
         prop="department"
         header-align="center"
         align="center"
@@ -100,7 +106,8 @@
         label="操作">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
-          <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>
+          <!-- <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button> -->
+          <el-button type="text" size="small" @click="resignHandle(scope.row.id)">离职</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -155,7 +162,7 @@
           })
         }).then(({data}) => {
           if (data && data.code === 0) {
-            this.dataList = data.page.list
+            this.dataList = this.setStatusStr(data.page.list)
             this.totalPage = data.page.totalCount
           } else {
             this.dataList = []
@@ -163,6 +170,14 @@
           }
           this.dataListLoading = false
         })
+      },
+      setStatusStr(list) {
+        if (list && list.length > 0) {
+          list.forEach(element => {
+            this.$set(element,'statusStr',element.status===1?'在职':'离职');
+          });
+        }
+        return list;
       },
       // 每页数
       sizeChangeHandle (val) {
@@ -184,6 +199,36 @@
         this.addOrUpdateVisible = true
         this.$nextTick(() => {
           this.$refs.addOrUpdate.init(id)
+        })
+      },
+      // 办理离职
+      resignHandle (id) {
+        var ids = id ? [id] : this.dataListSelections.map(item => {
+          return item.id
+        })
+        this.$confirm(`确定对[id=${ids.join(',')}]进行[${id ? '离职' : '批量离职'}]操作?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$http({
+            url: this.$http.adornUrl('/generator/empinfo/resign'),
+            method: 'post',
+            data: this.$http.adornData(ids, false)
+          }).then(({data}) => {
+            if (data && data.code === 0) {
+              this.$message({
+                message: '操作成功',
+                type: 'success',
+                duration: 1500,
+                onClose: () => {
+                  this.getDataList()
+                }
+              })
+            } else {
+              this.$message.error(data.msg)
+            }
+          })
         })
       },
       // 删除
