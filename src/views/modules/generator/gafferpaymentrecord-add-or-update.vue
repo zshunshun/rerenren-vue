@@ -44,6 +44,7 @@
 </template>
 
 <script>
+  import { formatDate } from '@/utils/dateUtils'
   export default {
     data () {
       return {
@@ -139,6 +140,7 @@
       dataFormSubmit () {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
+            let paymentDate = this.dataForm.paymentDate;
             this.$http({
               url: this.$http.adornUrl(`/generator/gafferpaymentrecord/${!this.dataForm.id ? 'save' : 'update'}`),
               method: 'post',
@@ -146,8 +148,8 @@
                 'id': this.dataForm.id || undefined,
                 'gafferId': this.dataForm.gafferId,
                 'amount': this.dataForm.amount,
-                'paymentDate': this.dataForm.paymentDate,
-                'createTime': this.dataForm.createTime
+                'paymentDate': (typeof(paymentDate) != 'string') ? formatDate(paymentDate,'yyyy-MM') : paymentDate
+                // 'createTime': this.dataForm.createTime
               })
             }).then(({data}) => {
               if (data && data.code === 0) {
