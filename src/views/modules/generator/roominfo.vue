@@ -23,12 +23,6 @@
         width="50">
       </el-table-column>
       <el-table-column
-        prop="id"
-        header-align="center"
-        align="center"
-        label="">
-      </el-table-column>
-      <el-table-column
         prop="roomNo"
         header-align="center"
         align="center"
@@ -47,10 +41,16 @@
         label="房间价格（按天）">
       </el-table-column>
       <el-table-column
-        prop="status"
+        prop="totalNum"
         header-align="center"
         align="center"
-        label="当前状态：0-空置 1-占用">
+        label="总床位数">
+      </el-table-column>
+      <el-table-column
+        prop="leftNum"
+        header-align="center"
+        align="center"
+        label="剩余床位数">
       </el-table-column>
       <el-table-column
         fixed="right"
