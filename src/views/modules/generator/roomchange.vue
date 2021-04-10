@@ -23,28 +23,34 @@
         width="50">
       </el-table-column>
       <el-table-column
-        prop="id"
+        prop="gaffer.name"
         header-align="center"
         align="center"
-        label="">
+        label="所属老人">
       </el-table-column>
       <el-table-column
-        prop="theAgedId"
+        prop="beforeRoom.roomNo"
         header-align="center"
         align="center"
-        label="所属老人id">
+        label="变更前房间编号">
       </el-table-column>
       <el-table-column
-        prop="beforeRoomId"
+        prop="beforeRoom.type"
         header-align="center"
         align="center"
-        label="变更前房间id">
+        label="变更前房间类型">
       </el-table-column>
       <el-table-column
-        prop="nowRoomId"
+        prop="afterRoom.roomNo"
         header-align="center"
         align="center"
-        label="变更后房间id">
+        label="变更后房间编号">
+      </el-table-column>
+      <el-table-column
+        prop="afterRoom.type"
+        header-align="center"
+        align="center"
+        label="变更前房间类型">
       </el-table-column>
       <el-table-column
         prop="createTime"
@@ -102,6 +108,105 @@
       this.getDataList()
     },
     methods: {
+      getGafferInfo() {
+        let list = this.dataList;
+        if (list && list.length > 0) {
+          console.log('list:',list);
+          let gafferIds = [];
+          list.forEach(item => {
+            gafferIds.push(item.theAgedId);
+          })
+          // 获取老人信息
+          this.$http({
+            url: this.$http.adornUrl('/generator/gafferinfo/list'),
+            method: 'get',
+            params: this.$http.adornParams({
+              'gafferIdList': gafferIds.join(',')
+            })
+          }).then(({data}) => {
+            if (data && data.code === 0) {
+              console.log('gafferInfo',data.page.list);
+              let dataList = data.page.list;
+              if (dataList && dataList.length > 0) {
+                this.dataList.forEach(item => {
+                  dataList.forEach(gaffer => {
+                    if (item.theAgedId === gaffer.id) {
+                      this.$set(item,'gaffer',gaffer);
+                      return;
+                    }
+                  })
+                })
+              }
+            }
+          })
+        }
+      },
+      getBeforeRoomInfo() {
+        let list = this.dataList;
+        if (list && list.length > 0) {
+          console.log('list:',list);
+          let roomIds = [];
+          list.forEach(item => {
+            roomIds.push(item.beforeRoomId);
+          })
+          // 获取老人信息
+          this.$http({
+            url: this.$http.adornUrl('/generator/roominfo/list'),
+            method: 'get',
+            params: this.$http.adornParams({
+              'roomIdList': roomIds.join(',')
+            })
+          }).then(({data}) => {
+            if (data && data.code === 0) {
+              console.log('roomIdList',data.page.list);
+              let dataList = data.page.list;
+              if (dataList && dataList.length > 0) {
+                this.dataList.forEach(item => {
+                  dataList.forEach(root => {
+                    if (item.beforeRoomId === root.id) {
+                      this.$set(item,'beforeRoom',root);
+                      return;
+                    }
+                  })
+                })
+              }
+            }
+          })
+        }
+      },
+      getAfterRoomInfo() {
+        let list = this.dataList;
+        if (list && list.length > 0) {
+          console.log('list:',list);
+          let roomIds = [];
+          list.forEach(item => {
+            roomIds.push(item.nowRoomId);
+          })
+          // 获取老人信息
+          this.$http({
+            url: this.$http.adornUrl('/generator/roominfo/list'),
+            method: 'get',
+            params: this.$http.adornParams({
+              'roomIdList': roomIds.join(',')
+            })
+          }).then(({data}) => {
+            if (data && data.code === 0) {
+              console.log('roomIdList',data.page.list);
+              let dataList = data.page.list;
+              if (dataList && dataList.length > 0) {
+                this.dataList.forEach(item => {
+                  dataList.forEach(root => {
+                    if (item.nowRoomId === root.id) {
+                      this.$set(item,'afterRoom',root);
+                      return;
+                    }
+                  })
+                })
+              }
+            }
+          })
+        }
+      },
       // 获取数据列表
       getDataList () {
         this.dataListLoading = true
@@ -117,6 +222,9 @@
           if (data && data.code === 0) {
             this.dataList = data.page.list
             this.totalPage = data.page.totalCount
+            this.getGafferInfo();
+            this.getBeforeRoomInfo();
+            this.getAfterRoomInfo();
           } else {
             this.dataList = []
             this.totalPage = 0
