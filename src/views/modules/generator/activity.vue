@@ -23,12 +23,6 @@
         width="50">
       </el-table-column>
       <el-table-column
-        prop="id"
-        header-align="center"
-        align="center"
-        label="">
-      </el-table-column>
-      <el-table-column
         prop="title"
         header-align="center"
         align="center"
@@ -41,7 +35,7 @@
         label="内容">
       </el-table-column>
       <el-table-column
-        prop="operationUserId"
+        prop="user.username"
         header-align="center"
         align="center"
         label="发布人">
@@ -117,6 +111,7 @@
           if (data && data.code === 0) {
             this.dataList = data.page.list
             this.totalPage = data.page.totalCount
+            this.getUserInfo();
           } else {
             this.dataList = []
             this.totalPage = 0
@@ -144,6 +139,33 @@
         this.addOrUpdateVisible = true
         this.$nextTick(() => {
           this.$refs.addOrUpdate.init(id)
+        })
+      },
+      getUserInfo() {
+        let dataList = this.dataList
+        let userIdList = []
+        dataList.forEach(data => {
+          userIdList.push(data.operationUserId)
+        })
+        this.$http({
+          url: this.$http.adornUrl('/sys/user/listByIds'),
+          method: 'get',
+          params: this.$http.adornParams({
+            'userIdList': userIdList.map(item => item).join(',')
+          })
+        }).then(({data}) => {
+          if (data && data.code == 0) {
+            let userList = data.userList;
+            console.log(userList);
+            this.dataList.forEach(item => {
+              userList.forEach(user => {
+                if (item.operationUserId == user.userId) {
+                  this.$set(item,'user',user);
+                  return;
+                }
+              });
+            });
+          }
         })
       },
       // 删除

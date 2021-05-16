@@ -10,12 +10,12 @@
     <el-form-item label="内容" prop="content">
       <el-input v-model="dataForm.content" placeholder="内容"></el-input>
     </el-form-item>
-    <el-form-item label="发布人" prop="operationUserId">
-      <el-input v-model="dataForm.operationUserId" placeholder="发布人"></el-input>
-    </el-form-item>
-    <el-form-item label="创建时间" prop="createTime">
-      <el-input v-model="dataForm.createTime" placeholder="创建时间"></el-input>
-    </el-form-item>
+<!--    <el-form-item label="发布人" prop="operationUserId">-->
+<!--      <el-input v-model="dataForm.operationUserId" placeholder="发布人"></el-input>-->
+<!--    </el-form-item>-->
+<!--    <el-form-item label="创建时间" prop="createTime">-->
+<!--      <el-input v-model="dataForm.createTime" placeholder="创建时间"></el-input>-->
+<!--    </el-form-item>-->
     </el-form>
     <span slot="footer" class="dialog-footer">
       <el-button @click="visible = false">取消</el-button>
@@ -42,12 +42,6 @@
           ],
           content: [
             { required: true, message: '内容不能为空', trigger: 'blur' }
-          ],
-          operationUserId: [
-            { required: true, message: '发布人不能为空', trigger: 'blur' }
-          ],
-          createTime: [
-            { required: true, message: '创建时间不能为空', trigger: 'blur' }
           ]
         }
       }
@@ -67,8 +61,6 @@
               if (data && data.code === 0) {
                 this.dataForm.title = data.activity.title
                 this.dataForm.content = data.activity.content
-                this.dataForm.operationUserId = data.activity.operationUserId
-                this.dataForm.createTime = data.activity.createTime
               }
             })
           }
