@@ -46,9 +46,27 @@
           </el-option>
         </el-select>
       </el-form-item>
-    <el-form-item label="变更后房间号" prop="nowRoomId">
-      <el-input v-model="dataForm.nowRoomId" placeholder="变更后房间id"></el-input>
-    </el-form-item>
+<!--    <el-form-item label="变更后房间号" prop="nowRoomId">-->
+<!--      <el-input v-model="dataForm.nowRoomId" placeholder="变更后房间id"></el-input>-->
+<!--    </el-form-item>-->
+      <el-form-item label="变更后房间" prop="nowRoomId">
+        <el-select
+          v-model="dataForm.nowRoomId"
+          filterable
+          remote
+          reserve-keyword
+          @change="changeSelectRoom"
+          placeholder="请输入关键词"
+          :remote-method="remoteSearchRoom2"
+          :loading="loading">
+          <el-option
+            v-for="item in afterRoomList"
+            :key="item.id"
+            :label="item.roomNo+':'+item.type"
+            :value="item.id">
+          </el-option>
+        </el-select>
+      </el-form-item>
 <!--    <el-form-item label="创建时间" prop="createTime">-->
 <!--      <el-input v-model="dataForm.createTime" placeholder="创建时间"></el-input>-->
 <!--    </el-form-item>-->
@@ -69,6 +87,7 @@
         loading: false,
         gafferList: [],
         beforeRoomList: '',
+        afterRoomList: '',
         selectBeforeRoomId: [],
         dataForm: {
           id: 0,
@@ -188,6 +207,25 @@
               this.beforeRoomList = data.roomInfoList;
             } else {
               this.beforeRoomList = []
+            }
+            this.loading = false
+          })
+        }
+      },
+      remoteSearchRoom2(keyword) {
+        if(keyword != '') {
+          this.loading = true;
+          this.$http({
+            url: this.$http.adornUrl('/generator/roominfo/search'),
+            method: 'get',
+            params: this.$http.adornParams({
+              'keyword': keyword
+            })
+          }).then(({data}) => {
+            if (data && data.code === 0) {
+              this.afterRoomList = data.roomInfoList;
+            } else {
+              this.afterRoomList = []
             }
             this.loading = false
           })

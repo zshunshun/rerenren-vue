@@ -22,23 +22,23 @@
         align="center"
         width="50">
       </el-table-column>
+<!--      <el-table-column-->
+<!--        prop="id"-->
+<!--        header-align="center"-->
+<!--        align="center"-->
+<!--        label="序号">-->
+<!--      </el-table-column>-->
       <el-table-column
-        prop="id"
+        prop="gaffer.name"
         header-align="center"
         align="center"
-        label="">
+        label="老人">
       </el-table-column>
       <el-table-column
-        prop="gafferId"
+        prop="user.username"
         header-align="center"
         align="center"
-        label="老人账户id">
-      </el-table-column>
-      <el-table-column
-        prop="operationId"
-        header-align="center"
-        align="center"
-        label="查房人id">
+        label="查房人">
       </el-table-column>
       <el-table-column
         prop="content"
@@ -117,11 +117,73 @@
           if (data && data.code === 0) {
             this.dataList = data.page.list
             this.totalPage = data.page.totalCount
+            this.getUserInfo();
+            this.getGafferInfo();
           } else {
             this.dataList = []
             this.totalPage = 0
           }
           this.dataListLoading = false
+        })
+      },
+      getGafferInfo() {
+        let list = this.dataList;
+        if (list && list.length > 0) {
+          console.log('list:',list);
+          let gafferIds = [];
+          list.forEach(item => {
+            gafferIds.push(item.gafferId);
+          })
+          // 获取老人信息
+          this.$http({
+            url: this.$http.adornUrl('/generator/gafferinfo/list'),
+            method: 'get',
+            params: this.$http.adornParams({
+              'gafferIdList': gafferIds.join(',')
+            })
+          }).then(({data}) => {
+            if (data && data.code === 0) {
+              console.log('gafferInfo',data.page.list);
+              let dataList = data.page.list;
+              if (dataList && dataList.length > 0) {
+                this.dataList.forEach(item => {
+                  dataList.forEach(gaffer => {
+                    if (item.gafferId === gaffer.id) {
+                      this.$set(item,'gaffer',gaffer);
+                      return;
+                    }
+                  })
+                })
+              }
+            }
+          })
+        }
+      },
+      getUserInfo() {
+        let dataList = this.dataList
+        let userIdList = []
+        dataList.forEach(data => {
+          userIdList.push(data.operationId)
+        })
+        this.$http({
+          url: this.$http.adornUrl('/sys/user/listByIds'),
+          method: 'get',
+          params: this.$http.adornParams({
+            'userIdList': userIdList.map(item => item).join(',')
+          })
+        }).then(({data}) => {
+          if (data && data.code == 0) {
+            let userList = data.userList;
+            console.log(userList);
+            this.dataList.forEach(item => {
+              userList.forEach(user => {
+                if (item.operationId == user.userId) {
+                  this.$set(item,'user',user);
+                  return;
+                }
+              });
+            });
+          }
         })
       },
       // 每页数
